@@ -26,7 +26,7 @@ public class MovieCatalogResource {
 		return Collections.singletonList(new CatalogItem("Avengers End Game", "Marvel...", 5));
 	}*/
 
-	@RequestMapping("/{userId}")
+/*	@RequestMapping("/{userId}")
 	public List<CatalogItem> getCatalog(@PathVariable("userId") String userId) {
 
 		// get All rated movie ids
@@ -40,6 +40,21 @@ public class MovieCatalogResource {
 
 		// put them all together
 
+	}*/
+	
+	@RequestMapping("/{userId}")
+	public List<CatalogItem> getCatalog(@PathVariable("userId") String userId) {
+		// get All rated movie ids
+
+		UserRating ratings = restTemplate.getForObject("http://localhost:8083/ratingsdata/user/" + userId,
+				UserRating.class);
+
+		return ratings.getRating().stream().map(r -> {
+			// For each movie id , call movie info service and get details
+			Movie movie = restTemplate.getForObject("http://localhost:8082/movies/" + r.getMovieId(), Movie.class);
+			// put them all together
+			return new CatalogItem(movie.getName(), "Marvel...", r.getRating());
+		}).collect(Collectors.toList());
 	}
 
 }
